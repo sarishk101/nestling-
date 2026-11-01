@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nestling – Baby Tracker</title>
+<style>
+:root{--bg:#eef0fb;--card:#fff;--ink:#23264a;--mut:#6c7094;--acc:#5f59d6;--sl:#5f59d6;--ap:#ff9f6e;--sg:#4cb58f;--line:#dfe2f4;--chip:#e8e9fb;--on:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14162e;--card:#1e2142;--ink:#eceeff;--mut:#9a9dc8;--acc:#9a94ff;--sl:#9a94ff;--line:#333764;--chip:#2a2e5a;--on:#14162e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14162e;--card:#1e2142;--ink:#eceeff;--mut:#9a9dc8;--acc:#9a94ff;--sl:#9a94ff;--line:#333764;--chip:#2a2e5a;--on:#14162e;color-scheme:dark}
+:root[data-theme="night"]{--bg:#000;--card:#0a0605;--ink:#d9a86c;--mut:#8a6a45;--acc:#c0702a;--sl:#c0702a;--ap:#a85c2a;--sg:#6a8f5a;--line:#2b1a0e;--chip:#1a0f08;--on:#000;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:96px;min-height:100%}
+button,input{font:inherit;color:inherit}button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:12px 14px}
+h1,h2,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:700;margin:0}
+.top{display:flex;justify-content:space-between;align-items:center}
+.top h1{font-size:26px;letter-spacing:-.5px}
+.who{text-align:right;font-size:14px;color:var(--mut)}.who b{display:block;color:var(--ink);font-size:17px}
+.dn{display:flex;gap:8px;margin:12px 0}
+.dn button{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px 16px}
+.dn .d{flex:1;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin:12px 0}
+.ring{position:relative;max-width:320px;margin:0 auto}
+.ring svg{width:100%;display:block}
+.mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22%}
+.mid .big{font-family:Georgia,serif;font-size:26px;font-weight:700}
+.mid small{color:var(--mut)}
+.btn{border:0;background:var(--acc);color:var(--on);border-radius:999px;padding:11px 22px;font-weight:700;margin-top:8px}
+.btn.o{background:none;border:2px solid var(--acc);color:var(--acc)}
+.btn.ap{background:var(--ap);color:#23264a}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.tile{border:1px solid var(--line);background:var(--bg);border-radius:18px;padding:10px 2px 8px;text-align:center;font-size:13px}
+.tile span{display:block;font-size:28px;line-height:1.2}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}.row .i{font-size:24px}.row .t{flex:1}.row small{color:var(--mut);display:block}
+.x{border:0;background:none;color:var(--mut);font-size:20px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.chip{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:7px 14px}
+.chip.on{background:var(--acc);color:var(--on);border-color:var(--acc)}
+label{display:block;font-size:14px;color:var(--mut);margin-top:8px}
+input{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px;margin-top:4px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+nav button{flex:1;border:0;background:none;padding:6px 0;font-size:12px;color:var(--mut)}
+nav button span{display:block;font-size:22px}nav .on{color:var(--acc);font-weight:700}
+#sh{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;z-index:9}
+#sh.o{display:flex}
+#sh>div{background:var(--card);width:100%;max-width:560px;margin:0 auto;border-radius:26px 26px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow:auto}
+.bars{display:flex;gap:8px;align-items:flex-end;height:120px;margin-top:8px}
+.bars div{flex:1;text-align:center;font-size:12px;color:var(--mut)}
+.bars i{display:block;background:var(--sl);border-radius:8px 8px 3px 3px;margin-bottom:4px}
+.st{display:grid;grid-template-columns:1fr 1fr;gap:10px}.st div{background:var(--bg);border-radius:16px;padding:12px}
+.st b{font-family:Georgia,serif;font-size:22px;display:block}
+.ck{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:11px 0;border-top:1px solid var(--line)}
+.ck u{width:26px;height:26px;border:2px solid var(--acc);border-radius:9px;display:grid;place-items:center;text-decoration:none;flex:none}
+.ck.on u{background:var(--acc);color:var(--on)}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;display:none;z-index:20}
+@media (prefers-reduced-motion:no-preference){.ring circle.now{animation:p 2s infinite}@keyframes p{50%{opacity:.35}}}
+</style></head><body>
+<div class="wrap" id="app"></div>
+<nav id="nav"></nav><div id="sh"><div id="shc"></div></div><div id="toast"></div>
+<script>
+const DAY=864e5,$=s=>document.querySelector(s);
+const T={feed:['🍼','Bottle'],breast:['🤱','Breast'],nappy:['🧷','Nappy'],sleep:['🌙','Sleep'],wake:['⭐','Night wake'],pump:['🥛','Pump'],cry:['😢','Crying'],solid:['🥣','Solids'],med:['🌡️','Med / temp'],act:['🧸','Activity'],note:['📝','Note'],bath:['🛁','Bath'],care:['🧴','Care'],growth:['📏','Growth'],vax:['💉','Vaccine']};
+const F={
+feed:[{k:'ml',l:'Amount (ml)',t:'n',u:'ml'},{k:'what',l:'Milk',o:['Formula','Breast milk']}],
+breast:[{k:'side',l:'Side',o:['Left','Right','Both']},{k:'min',l:'Minutes',t:'n',u:'min'}],
+nappy:[{k:'kind',l:'Type',o:['Wet','Dirty','Both','Dry']},{k:'rash',l:'Skin',o:['Fine','Redness','Sore']}],
+sleep:[{k:'kind',l:'Type',o:['Nap','Bedtime']}],wake:[{k:'min',l:'Minutes awake',t:'n',u:'min'},{k:'how',l:'Settled by',o:['Feed','Cuddle','Alone']}],
+pump:[{k:'ml',l:'Amount (ml)',t:'n',u:'ml'},{k:'side',l:'Side',o:['Left','Right','Both']}],
+cry:[{k:'min',l:'Minutes',t:'n',u:'min'},{k:'why',l:'Likely reason',o:['Hungry','Tired','Gas','Nappy','Unsure']}],
+solid:[{k:'method',l:'Method',o:['Puree','Baby-led','Finger food']},{k:'food',l:'Food',o:['Avocado','Banana','Porridge','Sweet potato','Carrot','Egg','Yogurt','Peanut butter','Bread','Fish']},{k:'food2',l:'Other food',t:'s'},{k:'react',l:'Reaction',o:['Loved it','Okay','Refused','Rash or hives','Vomiting','Swelling or breathing trouble']}],
+med:[{k:'temp',l:'Temperature (°C)',t:'n',u:'°C'},{k:'med',l:'Medicine and dose',t:'s'},{k:'gap',l:'Wait before next dose',o:['4h','6h','8h','12h']}],
+act:[{k:'what',l:'Activity',o:['Tummy time','Play','Story','Walk','Music']},{k:'min',l:'Minutes',t:'n',u:'min'}],
+note:[{k:'text',l:'Note',t:'s'}],
+growth:[{k:'kg',l:'Weight (kg)',t:'n',u:'kg'},{k:'cm',l:'Length (cm)',t:'n',u:'cm'},{k:'head',l:'Head (cm)',t:'n',u:'cm head'}],vax:[{k:'name',l:'Vaccine',t:'s'},{k:'note',l:'Notes (batch, clinic)',t:'s'}]};
+const CARE=['Nail trim','Gum or tooth clean','Hair brush','Ear clean','Skin check','Moisturise'];
+let S={baby:{name:'',dob:''},ev:[],steps:['Check water is about 37 °C','Wash face and eyes','Wash neck, folds and body','Wash hair','Wrap in a warm towel','Pat skin folds dry','Moisturise','Nappy cream if needed']};
+try{const o=JSON.parse(localStorage.getItem('nestling')||'{}');if(o.steps)S.steps=o.steps;S.night=o.night;S.babies=o.babies||(o.baby?[{id:1,name:o.baby.name,dob:o.baby.dob,ev:o.ev||[]}]:[]);S.cur=o.cur}catch(e){}
+if(!S.babies||!S.babies.length)S.babies=[{id:1,name:'',dob:'',ev:[]}];
+S.baby=S.babies.find(b=>b.id===S.cur)||S.babies[0];S.ev=S.baby.ev;
+const save=()=>{try{localStorage.setItem('nestling',JSON.stringify({babies:S.babies,cur:S.baby.id,steps:S.steps,night:S.night}))}catch(e){}};
+const d0=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
+let tab='track',day=d0(Date.now()),sh=null,chk=[],bv={};
+const now=()=>Date.now(),ft=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const dur=m=>{m=Math.round(m);return m>=60?Math.floor(m/60)+'h '+(m%60)+'m':m+'m'};
+const endOf=e=>e.type==='sleep'?(e.end||now()):e.t;
+const evs=(a=day)=>S.ev.filter(e=>e.t<a+DAY&&endOf(e)>=a).sort((x,y)=>y.t-x.t);
+const li=t=>{const d=new Date(t-new Date(t).getTimezoneOffset()*6e4);return d.toISOString().slice(0,16)};
+const active=()=>S.ev.find(e=>e.type==='sleep'&&!e.end);
+const last=(...ty)=>S.ev.filter(e=>ty.includes(e.type)).sort((a,b)=>b.t-a.t)[0];
+const ageM=()=>S.baby.dob?(now()-new Date(S.baby.dob))/(30.44*DAY):null;
+const ageS=()=>{const m=ageM();return m===null?'Add birthday':m<2?Math.floor(m*4.35)+' weeks':Math.floor(m)+' months'};
+const wwin=()=>{const m=ageM()??6;return(m<3?60:m<6?105:m<9?150:m<12?180:210)*6e4};
+const feedGap=()=>((ageM()??6)<4?3:3.5)*36e5;
+const ago=t=>{const m=(now()-t)/6e4;return m<60?dur(m)+' ago':m<2880?Math.floor(m/60)+'h ago':Math.floor(m/1440)+' days ago'};
+const sleepMin=a=>S.ev.filter(e=>e.type==='sleep').reduce((s,e)=>s+Math.max(0,Math.min(endOf(e),a+DAY)-Math.max(e.t,a)),0)/6e4;
+function summ(e){
+if(e.type==='sleep')return(e.d.kind?e.d.kind+' · ':'')+dur(((e.end||now())-e.t)/6e4)+(e.end?'':' so far');
+if(e.type==='bath')return[e.d.steps&&e.d.steps+' steps',e.d.temp&&e.d.temp+' °C',e.d.mood].filter(Boolean).join(' · ');
+if(e.type==='care')return e.d.what;
+return(F[e.type]||[]).map(f=>e.d[f.k]!=null?e.d[f.k]+(f.u&&f.t==='n'?' '+f.u:''):'').filter(Boolean).join(' · ')}
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
+function add(type,t,d={},end){S.ev.push({id:now()+Math.random(),type,t,d,end});save();render()}
+const startSleep=k=>add('sleep',now(),{kind:k||(isNight()?'Bedtime':'Nap')});
+function wakeNow(){const a=active();if(a){a.end=now();save();render()}}
+const del=id=>{const i=S.ev.findIndex(e=>e.id===id);if(i>=0)S.ev.splice(i,1);save();render()};
+function ang(t){return(Math.min(Math.max(t,day),day+DAY)-day)/DAY*2*Math.PI-Math.PI/2}
+function arc(a,b,r){const p=x=>[150+r*Math.cos(x),150+r*Math.sin(x)],[x1,y1]=p(a),[x2,y2]=p(b);return`M${x1.toFixed(1)} ${y1.toFixed(1)}A${r} ${r} 0 ${b-a>Math.PI?1:0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`}
+function clock(){
+const E=evs(),isT=day===d0(now());let s='';
+E.filter(e=>e.type==='sleep').forEach(e=>{const a=ang(e.t),b=ang(endOf(e));if(b-a>.02)s+=`<path d="${arc(a,b,118)}" fill="none" stroke="var(--sl)" stroke-width="22" stroke-linecap="round"/>`});
+E.filter(e=>e.type!=='sleep'&&e.t>=day&&e.t<day+DAY).forEach(e=>{const a=ang(e.t);const c=['feed','breast','pump','solid'].includes(e.type)?'var(--ap)':e.type==='nappy'?'var(--sg)':'var(--mut)';s+=`<circle cx="${150+146*Math.cos(a)}" cy="${150+146*Math.sin(a)}" r="5" fill="${c}"/>`});
+if(isT){const a=ang(now());s+=`<circle class="now" cx="${150+118*Math.cos(a)}" cy="${150+118*Math.sin(a)}" r="6" fill="var(--ink)"/>`}
+const lb=[['12am',150,18],['6am',282,154],['12pm',150,292],['6pm',18,154]].map(([t,x,y])=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="11" fill="var(--mut)">${t}</text>`).join('');
+let mid='<div class="big">'+new Date(day).toLocaleDateString([],{weekday:'long'})+'</div><small>Nothing logged yet</small>';
+if(isT){const a=active(),l=last('sleep','wake');
+if(a)mid=`<small>${a.d.kind||'Sleep'} in progress</small><div class="big">${dur((now()-a.t)/6e4)}</div><small>Since ${ft(a.t)}</small><button class="btn ap" onclick="wakeNow()">Wake now</button>`;
+else{const w=l&&l.type==='sleep'?l.end:l?l.t:null;const nap=w?ft(w+wwin()):'';mid=`<small>Awake</small><div class="big">${w?dur((now()-w)/6e4):'–'}</div>${nap?`<small>Next nap about ${nap}</small>`:''}<div style="display:flex;gap:6px;justify-content:center;margin-top:8px"><button class="btn${isNight()?' o':''}" style="margin:0;padding:9px 14px" onclick="startSleep('Nap')">Nap</button><button class="btn${isNight()?'':' o'}" style="margin:0;padding:9px 14px" onclick="startSleep('Bedtime')">Bedtime</button></div>`}}
+else{const m=sleepMin(day);mid=`<small>Slept</small><div class="big">${dur(m)}</div>`}
+return`<div class="ring"><svg viewBox="0 0 300 300"><circle cx="150" cy="150" r="118" fill="none" stroke="var(--line)" stroke-width="22"/>${s}${lb}</svg><div class="mid">${mid}</div></div>`}
+function nextFeed(){const l=last('feed','breast');return l?`Next feed around ${ft(l.t+feedGap())} <small>(last ${ago(l.t)})</small>`:'Log a feed to see the next feed estimate'}
+function track(){
+const tiles=['feed','breast','nappy','sleep','wake','pump','cry','solid','med','act','note','bath'].map(k=>`<button class="tile" onclick="${k==='bath'?"go('bath')":`openS('${k}')`}"><span>${T[k][0]}</span>${T[k][1]}</button>`).join('');
+const list=evs().map(e=>`<div class="row"><div class="i">${T[e.type][0]}</div><div class="t">${T[e.type][1]}<small>${summ(e)}</small></div><small>${ft(e.t)}</small><button class="x" aria-label="Delete" onclick="del(${e.id})">×</button></div>`).join('')||'<small>Tap a tile above to log your first moment.</small>';
+return`${S.baby.name?'':`<div class="card"><b>Welcome to Nestling.</b><br><small>Add your baby’s name and birthday to get age-based nap and feed estimates.</small><br><button class="btn" onclick="go('grow')">Set up baby</button></div>`}
+<div class="card">${clock()}</div>${day===d0(now())?`<div class="card"><h2>Next up</h2>${smart().map(x=>`<p style="margin:8px 0">${x}</p>`).join('')}</div>`:''}
+<div class="card"><h2 style="margin-bottom:10px">Log</h2><div class="grid">${tiles}</div></div>
+${warn?'<div class="card" style="border-color:#d33"><b>Possible reaction logged</b><br><small>If there is swelling, trouble breathing, or baby is floppy or very unwell, call emergency services now. For milder signs, contact your doctor or health visitor before offering this food again.</small><br><button class="chip" onclick="warn=false;render()">Dismiss</button></div>':''}<div class="card"><h2>Soothing sounds</h2><div class="chips">${['White','Brown','Rain'].map(n=>`<button class="chip ${snd&&snd.n===n?'on':''}" onclick="sound('${n}')">${n}</button>`).join('')}${snd?'<button class="chip" onclick="sound()">Stop</button>':''}</div><small>Stops after 30 minutes. Keep the volume low and the phone a few metres from the cot.</small></div>
+<div class="card"><h2>Timeline</h2>${list}</div>`}
+function bath(){
+const lb=last('bath'),a=ageM()??3;
+const tip=a<1?'Newborns do well with sponge baths until the cord stump heals. Check with your midwife or nurse.':a<6?'Two to three baths a week is plenty. Keep it brief and warm.':'Bath time can be part of the bedtime routine. Never leave baby alone, even for a moment.';
+const rows=S.steps.map((s,i)=>`<button class="ck ${chk.includes(i)?'on':''}" onclick="tg(${i})"><u>${chk.includes(i)?'✓':''}</u><span style="flex:1">${s}</span></button>`).join('');
+const care=CARE.map(c=>{const l=S.ev.filter(e=>e.type==='care'&&e.d.what===c).sort((x,y)=>y.t-x.t)[0];return`<div class="row"><div class="t">${c}<small>${l?'Done '+ago(l.t):'Not logged yet'}</small></div><button class="btn o" style="margin:0;padding:7px 16px" onclick="add('care',now(),{what:'${c}'});toast('Logged')">Done</button></div>`}).join('');
+return`<div class="card"><h2>Bath routine</h2><small>${lb?'Last bath '+ago(lb.t):'No baths logged yet'}</small><p>${tip}</p>${rows}
+<label>Water temperature (°C)<input type="number" inputmode="decimal" value="${bv.temp||''}" oninput="bv.temp=this.value"></label>
+<div class="chips">${['Loved it','Calm','Fussy'].map(m=>`<button class="chip ${bv.mood===m?'on':''}" onclick="bv.mood='${m}';render()">${m}</button>`).join('')}</div>
+<button class="btn" onclick="logBath()">Log bath (${chk.length}/${S.steps.length})</button></div>
+<div class="card"><h2>Add a step</h2><input id="ns" placeholder="For example: Rinse with cup"><button class="btn o" onclick="addStep()">Add step</button></div>
+<div class="card"><h2>Head-to-toe care</h2>${care}</div>`}
+const tg=i=>{chk=chk.includes(i)?chk.filter(x=>x!==i):[...chk,i];render()};
+function logBath(){add('bath',now(),{steps:chk.length+'/'+S.steps.length,temp:bv.temp,mood:bv.mood});chk=[];bv={};toast('Bath logged')}
+function addStep(){const v=$('#ns').value.trim();if(v){S.steps.push(v);save();render()}}
+function stats(){
+const E=evs(),c=ty=>E.filter(e=>ty.includes(e.type)),sm=(ty,k)=>c(ty).reduce((s,e)=>s+(+e.d[k]||0),0);
+const wet=c(['nappy']).filter(e=>['Wet','Both'].includes(e.d.kind)).length,dirty=c(['nappy']).filter(e=>['Dirty','Both'].includes(e.d.kind)).length;
+const days=[...Array(7)].map((_,i)=>day-(6-i)*DAY),mx=Math.max(16*60,...days.map(sleepMin));
+const bars=days.map(a=>{const m=sleepMin(a);return`<div><i style="height:${Math.max(4,m/mx*90)}px"></i>${new Date(a).toLocaleDateString([],{weekday:'narrow'})}<br>${(m/60).toFixed(1)}</div>`}).join('');
+return`<div class="card"><h2 style="margin-bottom:10px">${day===d0(now())?'Today':new Date(day).toLocaleDateString([],{weekday:'long'})}</h2><div class="st">
+<div><b>${c(['feed','breast']).length}</b>feeds</div><div><b>${sm(['feed','pump'],'ml')} ml</b>bottle and pumped</div>
+<div><b>${dur(sleepMin(day))}</b>sleep</div><div><b>${sm(['breast'],'min')} min</b>breastfeeding</div>
+<div><b>${wet} / ${dirty}</b>wet / dirty nappies</div><div><b>${sm(['cry'],'min')} min</b>crying</div>
+<div><b>${sm(['act'],'min')} min</b>play and tummy time</div><div><b>${c(['bath']).length}</b>baths</div></div>
+<button class="btn" onclick="copyRep()">Copy day report</button></div>
+<div class="card"><h2>Sleep, last 7 days (hours)</h2><div class="bars">${bars}</div></div>${foods()}<div class="card"><h2>Doctor visit summary</h2><small>Last 7 days of sleep, feeds, nappies, temperatures, medicines, foods and growth.</small><br><button class="btn" onclick="shr(rep7())">Share summary</button></div>`}
+function copyRep(){const E=evs().reverse();const t=`${S.baby.name||'Baby'} – ${new Date(day).toLocaleDateString()}\n`+E.map(e=>`${ft(e.t)} ${T[e.type][1]} ${summ(e)}`).join('\n');
+try{navigator.clipboard.writeText(t).then(()=>toast('Report copied'),()=>toast('Copy not available'))}catch(e){toast('Copy not available')}}
+function grow(){
+const g=S.ev.filter(e=>e.type==='growth').sort((a,b)=>b.t-a.t).map(e=>`<div class="row"><div class="t">${new Date(e.t).toLocaleDateString()}<small>${summ(e)}</small></div><button class="x" aria-label="Delete" onclick="del(${e.id})">×</button></div>`).join('')||'<small>No measurements yet.</small>';
+return`<div class="card"><h2>Baby</h2><label>Name<input value="${S.baby.name}" oninput="S.baby.name=this.value;save()"></label>
+<label>Birthday<input type="date" value="${S.baby.dob}" oninput="S.baby.dob=this.value;save()"></label>
+<label>Sex (for WHO growth charts)</label><div class="chips">${[['g','Girl'],['b','Boy']].map(([k,l])=>`<button class="chip ${S.baby.sex===k?'on':''}" onclick="S.baby.sex='${k}';save();render()">${l}</button>`).join('')}</div><label>Photo<input type="file" accept="image/*" onchange="pickPhoto(this)"></label><button class="btn" onclick="render();toast('Saved')">Save</button></div>
+${gchart()}<div class="card"><h2>Growth</h2>${g}<button class="btn o" onclick="openS('growth')">Add measurement</button></div>
+${hand()}${vax()}<div class="card"><button class="btn o" onclick="addBaby()">Add another baby</button> <button class="btn o" onclick="copyCsv()">Copy all data (CSV)</button><p><small>Your data stays on this device. Clearing browser data removes it, so copy a backup now and then.</small></p></div>`}
+const go=t=>{tab=t;render();scrollTo(0,0)};
+function nextBaby(){const i=S.babies.indexOf(S.baby);S.baby=S.babies[(i+1)%S.babies.length];S.ev=S.baby.ev;chk=[];save();render();toast('Switched to '+(S.baby.name||'baby'))}
+function addBaby(){const b={id:now(),name:'',dob:'',ev:[]};S.babies.push(b);S.baby=b;S.ev=b.ev;chk=[];save();render();scrollTo(0,0)}
+function copyCsv(){const r=['baby,type,start,end,details'];S.babies.forEach(b=>b.ev.forEach(e=>r.push([b.name,e.type,new Date(e.t).toISOString(),e.end?new Date(e.end).toISOString():'','"'+JSON.stringify(e.d).replace(/"/g,'""')+'"'].join(','))));try{navigator.clipboard.writeText(r.join('\n')).then(()=>toast('CSV copied'),()=>toast('Copy not available'))}catch(e){toast('Copy not available')}}
+const MS=[[0,['Follows faces','Lifts head in tummy time','Social smile','Calms to your voice']],[3,['Laughs out loud','Holds a rattle','Rolls tummy to back','Reaches for toys']],[6,['Sits with support','Rolls both ways','Passes toy hand to hand','Babbles ba and da']],[9,['Sits without help','Crawls or scoots','Waves bye-bye','Pincer grasp']],[12,['Pulls to stand','Says a first word','Claps hands','Takes first steps']]];
+function ms(o=0){const m=ageM()??0,i=MS.indexOf([...MS].reverse().find(x=>m>=x[0])||MS[0])+o,band=MS[Math.min(i,MS.length-1)];S.baby.ms=S.baby.ms||{};return`<div class="card"><h2>Milestones from ${band[0]} months</h2><small>Every baby develops at their own pace.</small>${band[1].map(x=>`<button class="ck ${S.baby.ms[x]?'on':''}" onclick="S.baby.ms['${x}']=S.baby.ms['${x}']?0:now();save();render()"><u>${S.baby.ms[x]?'✓':''}</u><span style="flex:1">${x}<small>${S.baby.ms[x]?'Achieved '+new Date(S.baby.ms[x]).toLocaleDateString():''}</small></span></button>`).join('')}</div>`}
+let warn=false;
+const AL=/\b(egg|milk|dairy|yogh?urt|cheese|peanut|nut|nuts|almond|cashew|wheat|bread|pasta|fish|salmon|tuna|soy|tofu|sesame|tahini|prawn|shrimp)/i,isAl=n=>AL.test(n||''),isNight=()=>{const h=new Date().getHours();return h>=18||h<5};
+const mile=()=>ms(0)+((ageM()??0)>=12?'':ms(1));
+function tipFor(){if(!sh||sh.k!=='solid')return'';return isAl(sh.v.food2||sh.v.food)?`<div class="card" style="margin:8px 0"><b>⚠️ Common allergen</b><br><small>Offer a small amount, in a texture that is safe for baby’s age, earlier in the day so you can watch for a reaction. Hives, vomiting or swelling can appear within minutes to a couple of hours. If there is swelling, trouble breathing, or baby is floppy or very unwell, call emergency services. Ask your doctor or health visitor if allergies run in your family.</small></div>`:''}
+function foods(){const m={};S.ev.filter(e=>e.type==='solid').sort((a,b)=>a.t-b.t).forEach(e=>{const n=(e.d.food2||e.d.food||'').trim();if(!n)return;const k=n.toLowerCase(),o=m[k]=m[k]||{n,t:e.t,c:0,bad:0,al:isAl(n)};o.c++;if(/Rash|Vomit|Swell/.test(e.d.react||''))o.bad++});const a=Object.values(m);return`<div class="card"><h2>Foods tried (${a.length})</h2>${a.map(o=>`<div class="row"><div class="t">${o.n}${o.al?' ⚠️':''}<small>First tried ${new Date(o.t).toLocaleDateString()} · ${o.c}×${o.bad?' · reaction noted':''}</small></div></div>`).join('')||'<small>Log solids to build your food list.</small>'}<small>⚠️ marks common allergens.</small></div>`}
+function md(s){const m=last('med');if(!m||!m.d.gap)return s?'':'none';const due=m.t+parseInt(m.d.gap)*36e5,nm=m.d.med||'Medicine';return due>now()?`${nm}: next dose not before ${ft(due)}. Follow the label or your doctor’s advice.`:`${nm}: the ${m.d.gap} wait since the last dose has passed. Check the label before giving another.`}
+function smart(){const a=active(),l=last('sleep','wake'),o=[],bt=d0(now())+((ageM()??6)<12?19:19.5)*36e5;
+if(a)o.push(a.d.kind==='Bedtime'?`Bedtime started ${ft(a.t)}.`:`Nap started ${ft(a.t)}. Most naps run 45 to 90 minutes, so around ${ft(a.t+90*6e4)} is a good time to check.`);
+else if(l){const w=l.type==='sleep'?l.end:l.t,nt=w+wwin();if(nt>bt-45*6e4&&now()<bt+2*36e5)o.push(`Next sleep is bedtime. Start winding down at ${ft(bt-30*6e4)} and aim for lights out around ${ft(bt)}.`);else if(nt>now())o.push(`Based on a ${dur(wwin()/6e4)} wake window, put baby down for a nap around ${ft(nt)} (in ${dur((nt-now())/6e4)}).`);else o.push(`Baby is past the usual ${dur(wwin()/6e4)} wake window. Look for tired cues and try a nap now.`)}
+else o.push('Log when baby last woke up and Nestling will forecast the next nap or bedtime.');
+const f=last('feed','breast');if(f){const nf=f.t+feedGap();o.push(nf>now()?`Next feed around ${ft(nf)}.`:`Last feed was ${ago(f.t)}. Baby may be ready to eat.`)}
+const m=md(true);if(m)o.push(m);return o}
+function shr(t){try{if(navigator.share){navigator.share({title:'Nestling',text:t}).catch(()=>{});return}}catch(e){}try{navigator.clipboard.writeText(t).then(()=>toast('Copied'),()=>toast('Copy not available'))}catch(e){toast('Copy not available')}}
+function handText(){const b=S.baby,td=d0(now()),f=last('feed','breast'),n=last('nappy'),a=active(),w=last('sleep','wake');return`Handover for ${b.name||'baby'} (${ageS()})\nToday: ${evs(td).filter(e=>['feed','breast'].includes(e.type)).length} feeds, ${dur(sleepMin(td))} sleep\nLast feed: ${f?ft(f.t)+' '+summ(f):'not logged'}\nLast nappy: ${n?ft(n.t)+' '+summ(n):'not logged'}\n${a?'Asleep since '+ft(a.t):w?'Awake since '+ft(w.type==='sleep'?w.end:w.t):''}\n${smart()[0]}\nNotes: ${b.prefs||'none'}\nMedicine: ${md()}`}
+function hand(){return`<div class="card"><h2>Caregiver handover</h2><small>Send today’s routine to a partner, grandparent or sitter. They need no app or account.</small><label>Notes for caregivers<input value="${(S.baby.prefs||'').replace(/"/g,'&quot;')}" oninput="S.baby.prefs=this.value;save()" placeholder="Comfort, routine, allergies"></label><button class="btn" onclick="shr(handText())">Share handover</button></div>`}
+function vax(){const v=S.ev.filter(e=>e.type==='vax').sort((a,b)=>b.t-a.t).map(e=>`<div class="row"><div class="t">${e.d.name||'Vaccine'}<small>${new Date(e.t).toLocaleDateString()}${e.d.note?' · '+e.d.note:''}</small></div><button class="x" aria-label="Delete" onclick="del(${e.id})">×</button></div>`).join('')||'<small>Record each vaccine with its date. Your clinic can give you the local schedule.</small>';return`<div class="card"><h2>Vaccinations</h2>${v}<button class="btn o" onclick="openS('vax')">Add vaccine</button></div>`}
+function rep7(){const D0=d0(now()),days=[...Array(7)].map((_,i)=>D0-i*DAY),g=ty=>S.ev.filter(e=>ty.includes(e.type)&&e.t>=days[6]),kd=(k)=>g(['nappy']).filter(e=>['Wet','Dirty'].includes(k)&&(e.d.kind===k||e.d.kind==='Both')).length/7,gr=S.ev.filter(e=>e.type==='growth').sort((a,b)=>b.t-a.t)[0],tm=g(['med']).sort((a,b)=>a.t-b.t).map(e=>new Date(e.t).toLocaleDateString()+' '+ft(e.t)+' '+summ(e));return`${S.baby.name||'Baby'} (${ageS()}) – last 7 days\nAverage sleep: ${(days.reduce((s,a)=>s+sleepMin(a),0)/7/60).toFixed(1)} h/day\nFeeds: ${(g(['feed','breast']).length/7).toFixed(1)}/day\nWet nappies: ${kd('Wet').toFixed(1)}/day, dirty: ${kd('Dirty').toFixed(1)}/day\nLatest growth: ${gr?summ(gr)+' ('+new Date(gr.t).toLocaleDateString()+')':'none logged'}\nTemperatures and medicines:\n${tm.join('\n')||'none logged'}\nFoods tried: ${[...new Set(S.ev.filter(e=>e.type==='solid').map(e=>e.d.food2||e.d.food).filter(Boolean))].join(', ')||'none'}`}
+const ON=Array(25).fill(1),W={g:[[0.3809,0.1714,0.0962,0.0402,-0.0050,-0.0430,-0.0756,-0.1039,-0.1288,-0.1507,-0.1700,-0.1872,-0.2024,-0.2158,-0.2278,-0.2384,-0.2478,-0.2562,-0.2637,-0.2703,-0.2762,-0.2815,-0.2862,-0.2903,-0.2941],[3.2322,4.1873,5.1282,5.8458,6.4237,6.8985,7.2970,7.6422,7.9487,8.2254,8.4800,8.7192,8.9481,9.1699,9.3870,9.6008,9.8124,10.0226,10.2315,10.4393,10.6464,10.8534,11.0608,11.2688,11.4775],[0.14171,0.13724,0.13000,0.12619,0.12402,0.12274,0.12204,0.12178,0.12181,0.12199,0.12223,0.12247,0.12268,0.12283,0.12294,0.12299,0.12303,0.12306,0.12309,0.12315,0.12323,0.12335,0.12350,0.12369,0.12390]],b:[[0.3487,0.2297,0.1970,0.1738,0.1553,0.1395,0.1257,0.1134,0.1021,0.0917,0.0820,0.0730,0.0644,0.0563,0.0487,0.0413,0.0343,0.0275,0.0211,0.0148,0.0087,0.0029,-0.0028,-0.0083,-0.0137],[3.3464,4.4709,5.5675,6.3762,7.0023,7.5105,7.9340,8.2970,8.6151,8.9014,9.1649,9.4122,9.6479,9.8749,10.0953,10.3108,10.5228,10.7319,10.9385,11.1430,11.3462,11.5486,11.7504,11.9514,12.1515],[0.14602,0.13395,0.12385,0.11727,0.11316,0.11080,0.10958,0.10902,0.10882,0.10881,0.10891,0.10906,0.10925,0.10949,0.10976,0.11007,0.11041,0.11079,0.11119,0.11164,0.11211,0.11261,0.11314,0.11369,0.11426]]},
+LEN={g:[ON,[49.1477,53.6872,57.0673,59.8029,62.0899,64.0301,65.7311,67.2873,68.7498,70.1435,71.4818,72.7710,74.0150,75.2176,76.3817,77.5099,78.6055,79.6710,80.7079,81.7182,82.7036,83.6654,84.6040,85.5202,86.4153],[0.03790,0.03640,0.03568,0.03520,0.03486,0.03463,0.03448,0.03441,0.03440,0.03444,0.03452,0.03464,0.03479,0.03496,0.03514,0.03534,0.03555,0.03576,0.03598,0.03620,0.03643,0.03666,0.03688,0.03711,0.03734]],b:[ON,[49.8842,54.7244,58.4249,61.4292,63.8860,65.9026,67.6236,69.1645,70.5994,71.9687,73.2812,74.5388,75.7488,76.9186,78.0497,79.1458,80.2113,81.2487,82.2587,83.2418,84.1996,85.1348,86.0477,86.9410,87.8161],[0.03795,0.03557,0.03424,0.03328,0.03257,0.03204,0.03165,0.03139,0.03124,0.03117,0.03118,0.03125,0.03137,0.03154,0.03174,0.03197,0.03222,0.03250,0.03279,0.03310,0.03342,0.03376,0.03410,0.03445,0.03479]]};
+let gm='kg';
+const lms=(t,m)=>{const a=Math.min(24,Math.max(0,m)),i=Math.floor(a),j=Math.min(24,i+1),f=a-i;return t.map(r=>r[i]+(r[j]-r[i])*f)},
+val=([L,M,S],z)=>L?M*Math.pow(1+L*S*z,1/L):M*Math.exp(S*z),
+zOf=([L,M,S],x)=>L?(Math.pow(x/M,L)-1)/(L*S):Math.log(x/M)/S,
+cdf=z=>{const t=1/(1+.2316419*Math.abs(z)),p=.3989423*Math.exp(-z*z/2)*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p},
+ord=n=>n+(n%100>10&&n%100<14?'th':['th','st','nd','rd'][n%10]||'th');
+function gchart(){const sx=S.baby.sex,dob=S.baby.dob;if(!sx||!dob)return`<div class="card"><h2>Growth chart</h2><small>Choose a sex and add a birthday above to see WHO percentile curves.</small></div>`;
+const T_=gm==='kg'?W[sx]:LEN[sx],pts=S.ev.filter(e=>e.type==='growth'&&e.d[gm]).map(e=>({a:(e.t-new Date(dob))/(30.44*DAY),v:+e.d[gm]})).filter(p=>p.a>=0&&p.a<=24).sort((a,b)=>a.a-b.a),zs=[-1.881,-1.036,0,1.036,1.881],lo=val(lms(T_,0),-1.881)*.97,hi=val(lms(T_,24),1.881),X=a=>36+a/24*268,Y=v=>188-(v-lo)/(hi-lo)*176;
+const cv=zs.map((z,j)=>`<path d="${[...Array(25).keys()].map(a=>(a?'L':'M')+X(a).toFixed(1)+' '+Y(val(lms(T_,a),z)).toFixed(1)).join('')}" fill="none" stroke="${z?'var(--mut)':'var(--acc)'}" stroke-width="${z?1:2}" opacity="${z?.7:1}"/><text x="306" y="${(Y(val(lms(T_,24),z))+3).toFixed(1)}" font-size="8" fill="var(--mut)">${['3','15','50','85','97'][j]}</text>`).join(''),
+dt=pts.map(p=>`<circle cx="${X(p.a).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="4" fill="var(--ap)"/>`).join(''),
+xl=[0,6,12,18,24].map(a=>`<text x="${X(a)}" y="204" font-size="9" text-anchor="middle" fill="var(--mut)">${a}m</text>`).join(''),
+l=pts[pts.length-1],pc=l?Math.round(cdf(zOf(lms(T_,l.a),l.v))*100):0;
+return`<div class="card"><h2>Growth chart</h2><div class="chips">${[['kg','Weight'],['cm','Length']].map(([k,t])=>`<button class="chip ${gm===k?'on':''}" onclick="gm='${k}';render()">${t}</button>`).join('')}</div><svg viewBox="0 0 330 212" style="width:100%"><rect x="36" y="12" width="268" height="176" fill="none" stroke="var(--line)"/>${cv}${dt}${xl}</svg><p>${l?`Latest ${gm==='kg'?'weight':'length'}: ${l.v} ${gm}, about the ${ord(pc)} percentile.`:'Add a measurement to plot it.'}</p><small>Lines show the 3rd, 15th, 50th, 85th and 97th percentiles of the WHO Child Growth Standards (2006). Steady growth along a curve matters more than any single number. Talk to your doctor if you are worried.</small></div>`}
+function pickPhoto(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(im.width,im.height);c.width=c.height=160;c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);S.baby.photo=c.toDataURL('image/jpeg',.8);save();render()};im.src=r.result};r.readAsDataURL(f)}
+let snd=null;
+function sound(n){if(snd){try{snd.s.stop();snd.c.close()}catch(e){}clearTimeout(snd.t);snd=null}if(n){try{const c=new(window.AudioContext||window.webkitAudioContext)(),len=c.sampleRate*2,b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0),br=n==='Brown';let l=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;l=(l+.02*w)/1.02;d[i]=br?l*3.2:w*.3}const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type=n==='Rain'?'highpass':'lowpass';f.frequency.value=n==='Rain'?1500:br?500:8000;const g=c.createGain();g.gain.value=.35;s.connect(f);f.connect(g);g.connect(c.destination);s.start();snd={n,s,c,t:setTimeout(()=>sound(),18e5)}}catch(e){toast('Sound not available')}}render()}
+function openS(k){const a=active();if(k==='sleep'&&a){wakeNow();return}sh={k,v:{},t:li(day===d0(now())?now():day+12*36e5),end:''};rs()}
+function rs(){const{k,v}=sh;
+const f=F[k].map(f=>f.o?`<label>${f.l}</label><div class="chips">${f.o.map(o=>`<button class="chip ${v[f.k]===o?'on':''}" onclick="sh.v['${f.k}']='${o}';rs()">${o}</button>`).join('')}</div>`:`<label>${f.l}<input ${f.t==='n'?'type="number" inputmode="decimal"':''} value="${v[f.k]||''}" oninput="sh.v['${f.k}']=this.value"></label>`).join('');
+$('#shc').innerHTML=`<h2>${T[k][0]} ${T[k][1]}</h2>${f}${tipFor()}<label>${k==='sleep'?'Fell asleep':'Time'}<input type="datetime-local" value="${sh.t}" oninput="sh.t=this.value"></label>${k==='sleep'?`<label>Woke up (leave empty if still asleep)<input type="datetime-local" value="${sh.end}" oninput="sh.end=this.value"></label>`:''}
+<button class="btn" onclick="saveS()">Save</button> <button class="btn o" onclick="closeS()">Cancel</button>`;$('#sh').classList.add('o')}
+const closeS=()=>{sh=null;$('#sh').classList.remove('o')};
+function saveS(){const d={};for(const k in sh.v)if(sh.v[k]!=='')d[k]=sh.v[k];const t=new Date(sh.t).getTime();if(isNaN(t)){toast('Pick a valid time');return}
+const end=sh.end?new Date(sh.end).getTime():undefined;const ty=sh.k;closeS();if(/Rash|Swelling|Vomiting/.test(d.react||''))warn=true;add(ty,t,d,end)}
+$('#sh').addEventListener('click',e=>{if(e.target.id==='sh')closeS()});
+function render(){if(S.night)document.documentElement.setAttribute('data-theme','night');else document.documentElement.removeAttribute('data-theme');
+const tabs=[['track','🌙','Track'],['bath','🛁','Bath & care'],['stats','📊','Insights'],['mile','⭐','Milestones'],['grow','🌱','Baby']];
+$('#nav').innerHTML=tabs.map(([k,i,l])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')"><span>${i}</span>${l}</button>`).join('');
+const hdr=`<div class="top"><h1>Nestling</h1><button class="chip" onclick="S.night=!S.night;save();render()">${S.night?'☀️ Day':'🌙 Night'}</button><div class="who" ${S.babies.length>1?'onclick="nextBaby()" role="button" tabindex="0"':''}>${S.baby.photo?`<img alt="" src="${S.baby.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;float:right;margin-left:10px">`:''}<b>${S.baby.name||'Your baby'}${S.babies.length>1?' ⇅':''}</b>${ageS()}</div></div>
+<div class="dn"><button aria-label="Previous day" onclick="day-=DAY;render()">‹</button><button class="d" onclick="day=d0(now());render()">${day===d0(now())?'Today, ':''}${new Date(day).toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})}</button><button aria-label="Next day" onclick="if(day<d0(now())){day+=DAY;render()}">›</button></div>`;
+$('#app').innerHTML=(tab==='grow'||tab==='bath'||tab==='mile'?hdr.replace(/<div class="dn">[\s\S]*$/,''):hdr)+({track,bath,stats,grow,mile}[tab])();}
+render();setInterval(()=>{if(!sh&&tab==='track'&&!document.activeElement.matches('input'))render()},30000);
+</script></body></html>
