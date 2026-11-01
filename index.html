@@ -2,6 +2,8 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Nestling – Baby Tracker</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#5f59d6"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
 :root{--bg:#eef0fb;--card:#fff;--ink:#23264a;--mut:#6c7094;--acc:#5f59d6;--sl:#5f59d6;--ap:#ff9f6e;--sg:#4cb58f;--line:#dfe2f4;--chip:#e8e9fb;--on:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14162e;--card:#1e2142;--ink:#eceeff;--mut:#9a9dc8;--acc:#9a94ff;--sl:#9a94ff;--line:#333764;--chip:#2a2e5a;--on:#14162e;color-scheme:dark}}
@@ -75,10 +77,10 @@ note:[{k:'text',l:'Note',t:'s'}],
 growth:[{k:'kg',l:'Weight (kg)',t:'n',u:'kg'},{k:'cm',l:'Length (cm)',t:'n',u:'cm'},{k:'head',l:'Head (cm)',t:'n',u:'cm head'}],vax:[{k:'name',l:'Vaccine',t:'s'},{k:'note',l:'Notes (batch, clinic)',t:'s'}]};
 const CARE=['Nail trim','Gum or tooth clean','Hair brush','Ear clean','Skin check','Moisturise'];
 let S={baby:{name:'',dob:''},ev:[],steps:['Check water is about 37 °C','Wash face and eyes','Wash neck, folds and body','Wash hair','Wrap in a warm towel','Pat skin folds dry','Moisturise','Nappy cream if needed']};
-try{const o=JSON.parse(localStorage.getItem('nestling')||'{}');if(o.steps)S.steps=o.steps;S.night=o.night;S.babies=o.babies||(o.baby?[{id:1,name:o.baby.name,dob:o.baby.dob,ev:o.ev||[]}]:[]);S.cur=o.cur}catch(e){}
+try{const o=JSON.parse(localStorage.getItem('nestling')||'{}');if(o.steps)S.steps=o.steps;S.night=o.night;S.gone=o.gone||[];S.babies=o.babies||(o.baby?[{id:1,name:o.baby.name,dob:o.baby.dob,ev:o.ev||[]}]:[]);S.cur=o.cur}catch(e){}
 if(!S.babies||!S.babies.length)S.babies=[{id:1,name:'',dob:'',ev:[]}];
 S.baby=S.babies.find(b=>b.id===S.cur)||S.babies[0];S.ev=S.baby.ev;
-const save=()=>{try{localStorage.setItem('nestling',JSON.stringify({babies:S.babies,cur:S.baby.id,steps:S.steps,night:S.night}))}catch(e){}};
+const save=()=>{try{localStorage.setItem('nestling',JSON.stringify({babies:S.babies,cur:S.baby.id,steps:S.steps,night:S.night,gone:S.gone}))}catch(e){}if(!quiet)pushSoon()};
 const d0=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
 let tab='track',day=d0(Date.now()),sh=null,chk=[],bv={};
 const now=()=>Date.now(),ft=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -103,7 +105,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';se
 function add(type,t,d={},end){S.ev.push({id:now()+Math.random(),type,t,d,end});save();render()}
 const startSleep=k=>add('sleep',now(),{kind:k||(isNight()?'Bedtime':'Nap')});
 function wakeNow(){const a=active();if(a){a.end=now();save();render()}}
-const del=id=>{const i=S.ev.findIndex(e=>e.id===id);if(i>=0)S.ev.splice(i,1);save();render()};
+const del=id=>{const i=S.ev.findIndex(e=>e.id===id);if(i>=0)S.ev.splice(i,1);(S.gone=S.gone||[]).push(id);save();render()};
 function ang(t){return(Math.min(Math.max(t,day),day+DAY)-day)/DAY*2*Math.PI-Math.PI/2}
 function arc(a,b,r){const p=x=>[150+r*Math.cos(x),150+r*Math.sin(x)],[x1,y1]=p(a),[x2,y2]=p(b);return`M${x1.toFixed(1)} ${y1.toFixed(1)}A${r} ${r} 0 ${b-a>Math.PI?1:0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`}
 function clock(){
@@ -161,7 +163,7 @@ return`<div class="card"><h2>Baby</h2><label>Name<input value="${S.baby.name}" o
 <label>Birthday<input type="date" value="${S.baby.dob}" oninput="S.baby.dob=this.value;save()"></label>
 <label>Sex (for WHO growth charts)</label><div class="chips">${[['g','Girl'],['b','Boy']].map(([k,l])=>`<button class="chip ${S.baby.sex===k?'on':''}" onclick="S.baby.sex='${k}';save();render()">${l}</button>`).join('')}</div><label>Photo<input type="file" accept="image/*" onchange="pickPhoto(this)"></label><button class="btn" onclick="render();toast('Saved')">Save</button></div>
 ${gchart()}<div class="card"><h2>Growth</h2>${g}<button class="btn o" onclick="openS('growth')">Add measurement</button></div>
-${hand()}${vax()}<div class="card"><button class="btn o" onclick="addBaby()">Add another baby</button> <button class="btn o" onclick="copyCsv()">Copy all data (CSV)</button><p><small>Your data stays on this device. Clearing browser data removes it, so copy a backup now and then.</small></p></div>`}
+${syncCard()}${hand()}${vax()}<div class="card"><button class="btn o" onclick="addBaby()">Add another baby</button> <button class="btn o" onclick="copyCsv()">Copy all data (CSV)</button> <button class="btn" onclick="dl('app')">Download app file</button> <button class="btn o" onclick="dl('data')">Download my data</button><p><small>Your data stays on this device. Clearing browser data removes it, so copy a backup now and then.</small></p></div>`}
 const go=t=>{tab=t;render();scrollTo(0,0)};
 function nextBaby(){const i=S.babies.indexOf(S.baby);S.baby=S.babies[(i+1)%S.babies.length];S.ev=S.baby.ev;chk=[];save();render();toast('Switched to '+(S.baby.name||'baby'))}
 function addBaby(){const b={id:now(),name:'',dob:'',ev:[]};S.babies.push(b);S.baby=b;S.ev=b.ev;chk=[];save();render();scrollTo(0,0)}
@@ -201,6 +203,42 @@ xl=[0,6,12,18,24].map(a=>`<text x="${X(a)}" y="204" font-size="9" text-anchor="m
 l=pts[pts.length-1],pc=l?Math.round(cdf(zOf(lms(T_,l.a),l.v))*100):0;
 return`<div class="card"><h2>Growth chart</h2><div class="chips">${[['kg','Weight'],['cm','Length']].map(([k,t])=>`<button class="chip ${gm===k?'on':''}" onclick="gm='${k}';render()">${t}</button>`).join('')}</div><svg viewBox="0 0 330 212" style="width:100%"><rect x="36" y="12" width="268" height="176" fill="none" stroke="var(--line)"/>${cv}${dt}${xl}</svg><p>${l?`Latest ${gm==='kg'?'weight':'length'}: ${l.v} ${gm}, about the ${ord(pc)} percentile.`:'Add a measurement to plot it.'}</p><small>Lines show the 3rd, 15th, 50th, 85th and 97th percentiles of the WHO Child Growth Standards (2006). Steady growth along a curve matters more than any single number. Talk to your doctor if you are worried.</small></div>`}
 function pickPhoto(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(im.width,im.height);c.width=c.height=160;c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);S.baby.photo=c.toDataURL('image/jpeg',.8);save();render()};im.src=r.result};r.readAsDataURL(f)}
+async function dl(w){try{const d=window.claude&&await claude.use('downloads');if(!d){toast('Download is not available here');return}
+if(w==='data'){await d.save({filename:'nestling-data.json',data:JSON.stringify({babies:S.babies,steps:S.steps},null,1)});return}
+const c=document.documentElement.cloneNode(true);['app','nav','shc','toast'].forEach(i=>{const e=c.querySelector('#'+i);if(e){e.innerHTML='';e.removeAttribute('style')}});c.removeAttribute('data-theme');const s=c.querySelector('#sh');if(s)s.classList.remove('o');
+await d.save({filename:'nestling.html',data:'<!DOCTYPE html>\n'+c.outerHTML})}catch(e){if(!e||e.code!=='declined')toast('Could not download')}}
+
+/* ---------- Family sync (Supabase). Fill in the two values below. ---------- */
+const SB_URL='https://qujvgxqntemlwuaeuisy.supabase.co',SB_KEY='sb_publishable_E6WiNWRhDrXUXiDewKjz1g_XaOWpZok';
+let sb=null,fam=null,sbUser=null,inv='',chan=null,quiet=false,pt=null;
+const pushSoon=()=>{clearTimeout(pt);pt=setTimeout(push,1200)};
+function applyRemote(d){
+const gone=new Set([...(S.gone||[]),...(d.gone||[])]);S.gone=[...gone];
+(d.babies||[]).forEach(rb=>{let lb=S.babies.find(b=>b.id===rb.id);
+if(!lb){S.babies.push(rb);return}
+const m=new Map(lb.ev.map(e=>[e.id,e]));
+(rb.ev||[]).forEach(e=>{const l=m.get(e.id);if(!l)lb.ev.push(e);else if(e.end&&!l.end)l.end=e.end});
+['name','dob','sex','photo','prefs'].forEach(k=>{if(rb[k]&&!lb[k])lb[k]=rb[k]});
+lb.ms=Object.assign({},rb.ms||{},lb.ms||{})});
+const lone=S.babies.length>1&&S.babies[0].ev.length===0&&!S.babies[0].name;if(lone)S.babies.shift();
+S.babies.forEach(b=>{b.ev=b.ev.filter(e=>!gone.has(e.id))});
+S.baby=S.babies.find(b=>b.id===S.baby.id)||S.babies[0];S.ev=S.baby.ev;
+if(d.steps&&d.steps.length>S.steps.length)S.steps=d.steps;
+quiet=true;save();quiet=false;render()}
+async function pull(){const{data}=await sb.from('families').select('data').eq('id',fam).single();if(data&&data.data)applyRemote(data.data)}
+async function push(){if(!sb||!fam)return;try{await pull();await sb.from('families').update({data:{babies:S.babies,steps:S.steps,gone:S.gone},updated_at:new Date().toISOString()}).eq('id',fam)}catch(e){}}
+async function listen(){if(chan)await sb.removeChannel(chan);chan=sb.channel('fam-'+fam).on('postgres_changes',{event:'UPDATE',schema:'public',table:'families',filter:'id=eq.'+fam},p=>{if(p.new&&p.new.data)applyRemote(p.new.data)}).subscribe();
+const{data}=await sb.from('families').select('invite_code').eq('id',fam).single();inv=data?data.invite_code:'';render()}
+async function syncStart(){if(fam)return;const{data}=await sb.from('family_members').select('family_id').limit(1);
+if(data&&data[0])fam=data[0].family_id;else{const r=await sb.rpc('create_family',{fname:'My family'});if(r.error){toast('Sync setup failed');return}fam=r.data}
+await listen();await push()}
+function syncInit(){if(!SB_URL||!SB_KEY||!window.supabase)return;sb=window.supabase.createClient(SB_URL,SB_KEY);
+sb.auth.onAuthStateChange((ev,s)=>{sbUser=s?s.user:null;if(s)syncStart();else{fam=null;inv=''}render()})}
+async function signIn(){const e=$('#em').value.trim();if(!e)return;const{error}=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.href.split('#')[0]}});toast(error?'Could not send link':'Check your email')}
+async function joinFam(){const c=$('#jc').value.trim().toLowerCase();if(!c)return;const{data,error}=await sb.rpc('join_family',{code:c});if(error){toast('Invalid code');return}fam=data;await listen();await push();toast('Joined family')}
+function syncCard(){if(!sb)return'';
+if(!sbUser)return`<div class="card"><h2>Family sync</h2><small>Sign in to share logs with your partner on any phone. We email you a one-time link, no password.</small><label>Email<input id="em" type="email" autocomplete="email"></label><button class="btn" onclick="signIn()">Send sign-in link</button></div>`;
+return`<div class="card"><h2>Family sync</h2><small>Signed in as ${sbUser.email}</small><p>Your invite code: <b>${inv||'…'}</b></p><label>Join a partner’s family<input id="jc" placeholder="Invite code"></label><button class="btn o" onclick="joinFam()">Join</button> <button class="btn o" onclick="sb.auth.signOut()">Sign out</button></div>`}
 let snd=null;
 function sound(n){if(snd){try{snd.s.stop();snd.c.close()}catch(e){}clearTimeout(snd.t);snd=null}if(n){try{const c=new(window.AudioContext||window.webkitAudioContext)(),len=c.sampleRate*2,b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0),br=n==='Brown';let l=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;l=(l+.02*w)/1.02;d[i]=br?l*3.2:w*.3}const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type=n==='Rain'?'highpass':'lowpass';f.frequency.value=n==='Rain'?1500:br?500:8000;const g=c.createGain();g.gain.value=.35;s.connect(f);f.connect(g);g.connect(c.destination);s.start();snd={n,s,c,t:setTimeout(()=>sound(),18e5)}}catch(e){toast('Sound not available')}}render()}
 function openS(k){const a=active();if(k==='sleep'&&a){wakeNow();return}sh={k,v:{},t:li(day===d0(now())?now():day+12*36e5),end:''};rs()}
@@ -218,5 +256,5 @@ $('#nav').innerHTML=tabs.map(([k,i,l])=>`<button class="${tab===k?'on':''}" oncl
 const hdr=`<div class="top"><h1>Nestling</h1><button class="chip" onclick="S.night=!S.night;save();render()">${S.night?'☀️ Day':'🌙 Night'}</button><div class="who" ${S.babies.length>1?'onclick="nextBaby()" role="button" tabindex="0"':''}>${S.baby.photo?`<img alt="" src="${S.baby.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;float:right;margin-left:10px">`:''}<b>${S.baby.name||'Your baby'}${S.babies.length>1?' ⇅':''}</b>${ageS()}</div></div>
 <div class="dn"><button aria-label="Previous day" onclick="day-=DAY;render()">‹</button><button class="d" onclick="day=d0(now());render()">${day===d0(now())?'Today, ':''}${new Date(day).toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})}</button><button aria-label="Next day" onclick="if(day<d0(now())){day+=DAY;render()}">›</button></div>`;
 $('#app').innerHTML=(tab==='grow'||tab==='bath'||tab==='mile'?hdr.replace(/<div class="dn">[\s\S]*$/,''):hdr)+({track,bath,stats,grow,mile}[tab])();}
-render();setInterval(()=>{if(!sh&&tab==='track'&&!document.activeElement.matches('input'))render()},30000);
+render();syncInit();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});setInterval(()=>{if(!sh&&tab==='track'&&!document.activeElement.matches('input'))render()},30000);
 </script></body></html>
